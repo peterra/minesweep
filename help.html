@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minesweeper - How to Play</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
+      line-height: 1.6;
+    }
+
+    .help {
+      max-width: 600px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 24px;
+      color: #fff;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin-top: 24px;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    p {
+      margin-bottom: 12px;
+      color: #ccc;
+    }
+
+    ul {
+      margin-bottom: 12px;
+      padding-left: 24px;
+      color: #ccc;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    .number-colors {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .number-colors span {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .n1 { color: #4fc3f7; }
+    .n2 { color: #66bb6a; }
+    .n3 { color: #ef5350; }
+    .n4 { color: #5c6bc0; }
+    .n5 { color: #c62828; }
+    .n6 { color: #26a69a; }
+    .n7 { color: #212121; }
+    .n8 { color: #9e9e9e; }
+
+    a {
+      color: #4fc3f7;
+    }
+
+    .back {
+      display: inline-block;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="help">
+    <a href="index.html" class="back">&larr; Back to game</a>
+    <h1>How to Play Minesweeper</h1>
+
+    <h2>Goal</h2>
+    <p>Reveal every cell on the board that doesn't contain a mine. If you click a mine, the game is over.</p>
+
+    <h2>Controls</h2>
+    <ul>
+      <li><strong>Left click</strong> &mdash; Reveal a cell</li>
+      <li><strong>Right click</strong> &mdash; Place or remove a flag on a cell you suspect is a mine</li>
+    </ul>
+
+    <h2>Numbers</h2>
+    <p>When you reveal a cell, it shows a number indicating how many of its 8 neighboring cells contain mines:</p>
+    <div class="number-colors">
+      <span class="n1">1</span>
+      <span class="n2">2</span>
+      <span class="n3">3</span>
+      <span class="n4">4</span>
+      <span class="n5">5</span>
+      <span class="n6">6</span>
+      <span class="n7">7</span>
+      <span class="n8">8</span>
+    </div>
+    <p>If a cell has no adjacent mines, it appears blank and all its neighbors are automatically revealed.</p>
+
+    <h2>Winning</h2>
+    <p>You win when every non-mine cell has been revealed. You don't need to flag all the mines &mdash; just avoid clicking them.</p>
+
+    <h2>Settings</h2>
+    <ul>
+      <li><strong>Rows / Cols</strong> &mdash; Change the board size (5&ndash;30)</li>
+      <li><strong>Mines</strong> &mdash; Set the number of mines (capped to fit the board)</li>
+      <li><strong>Upload Background</strong> &mdash; Add a custom background image behind the board</li>
+    </ul>
+
+    <h2>Tips</h2>
+    <ul>
+      <li>Start by clicking near the center &mdash; corners are more likely to give small reveals.</li>
+      <li>Use flags to keep track of mines you've identified through logic.</li>
+      <li>If a numbered cell already has that many flagged neighbors, the remaining neighbors are safe.</li>
+    </ul>
+  </div>
+</body>
+</html>
