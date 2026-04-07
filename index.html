@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minesweeper</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .game {
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    #status {
+      font-size: 16px;
+      margin-bottom: 12px;
+      color: #aaa;
+      min-height: 24px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .controls label {
+      font-size: 13px;
+      color: #aaa;
+    }
+
+    .controls input[type="number"] {
+      width: 50px;
+      padding: 4px 6px;
+      font-size: 13px;
+      background: #333;
+      color: #e0e0e0;
+      border: 1px solid #555;
+      border-radius: 4px;
+      text-align: center;
+    }
+
+    .controls button {
+      padding: 4px 12px;
+      font-size: 13px;
+      background: #444;
+      color: #e0e0e0;
+      border: 1px solid #666;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .controls button:hover {
+      background: #555;
+    }
+
+    .bg-controls {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .bg-controls label {
+      font-size: 13px;
+      color: #aaa;
+      cursor: pointer;
+      padding: 4px 12px;
+      background: #444;
+      border: 1px solid #666;
+      border-radius: 4px;
+    }
+
+    .bg-controls label:hover {
+      background: #555;
+    }
+
+    .bg-controls button {
+      padding: 4px 12px;
+      font-size: 13px;
+      background: #444;
+      color: #e0e0e0;
+      border: 1px solid #666;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .bg-controls button:hover {
+      background: #555;
+    }
+
+    #grid {
+      display: inline-grid;
+      gap: 0;
+      border: 2px solid #555;
+      user-select: none;
+    }
+
+    .cell {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      border: 2px outset #999;
+      background: #777;
+    }
+
+    .cell:hover {
+      background: #888;
+    }
+
+    .cell.revealed {
+      border: 1px solid rgba(68, 68, 68, 0.3);
+      background: rgba(42, 42, 62, 0.35);
+      cursor: default;
+    }
+
+    .cell.revealed:hover {
+      background: rgba(42, 42, 62, 0.35);
+    }
+
+    .cell.flagged {
+      color: #ef5350;
+    }
+
+    .cell.mine {
+      background: rgba(42, 42, 62, 0.35);
+    }
+
+    .cell.clicked-mine {
+      background: rgba(183, 28, 28, 0.5);
+    }
+
+    .cell.n1 { color: #4fc3f7; }
+    .cell.n2 { color: #66bb6a; }
+    .cell.n3 { color: #ef5350; }
+    .cell.n4 { color: #5c6bc0; }
+    .cell.n5 { color: #c62828; }
+    .cell.n6 { color: #26a69a; }
+    .cell.n7 { color: #212121; }
+    .cell.n8 { color: #9e9e9e; }
+
+    #new-game {
+      margin-top: 16px;
+      padding: 8px 24px;
+      font-size: 14px;
+      background: #444;
+      color: #e0e0e0;
+      border: 1px solid #666;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #new-game:hover {
+      background: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="game">
+    <h1>Minesweeper</h1>
+    <div class="controls">
+      <label>Rows: <input type="number" id="input-rows" value="9" min="5" max="30"></label>
+      <label>Cols: <input type="number" id="input-cols" value="9" min="5" max="30"></label>
+      <label>Mines: <input type="number" id="input-mines" value="10" min="1" max="200"></label>
+      <button id="apply-size">Apply</button>
+    </div>
+    <div class="bg-controls">
+      <label for="bg-upload">Upload Background</label>
+      <input type="file" id="bg-upload" accept="image/*" hidden>
+      <button id="bg-clear" hidden>Clear Background</button>
+    </div>
+    <div id="status">Click a cell to start</div>
+    <div id="grid"></div>
+    <button id="new-game">New Game</button>
+  </div>
+
+  <script>
+    let ROWS = 9;
+    let COLS = 9;
+    let MINES = 10;
+
+    let board = [];
+    let gameState = 'playing';
+    const BG_STORAGE_KEY = 'minesweeper-bg';
+
+    function createBoard() {
+      board = [];
+      for (let r = 0; r < ROWS; r++) {
+        board[r] = [];
+        for (let c = 0; c < COLS; c++) {
+          board[r][c] = { mine: false, revealed: false, flagged: false, adjacentMines: 0 };
+        }
+      }
+
+      // Place mines randomly
+      let placed = 0;
+      while (placed < MINES) {
+        const r = Math.floor(Math.random() * ROWS);
+        const c = Math.floor(Math.random() * COLS);
+        if (!board[r][c].mine) {
+          board[r][c].mine = true;
+          placed++;
+        }
+      }
+
+      // Calculate adjacent mine counts
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (board[r][c].mine) continue;
+          let count = 0;
+          for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+              const nr = r + dr;
+              const nc = c + dc;
+              if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && board[nr][nc].mine) {
+                count++;
+              }
+            }
+          }
+          board[r][c].adjacentMines = count;
+        }
+      }
+    }
+
+    function renderBoard() {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+      grid.style.gridTemplateColumns = `repeat(${COLS}, 32px)`;
+      grid.style.gridTemplateRows = `repeat(${ROWS}, 32px)`;
+
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const cell = board[r][c];
+          const div = document.createElement('div');
+          div.className = 'cell';
+          div.dataset.row = r;
+          div.dataset.col = c;
+
+          if (cell.revealed) {
+            div.classList.add('revealed');
+            if (cell.mine) {
+              div.classList.add('mine');
+              if (cell.clickedMine) {
+                div.classList.add('clicked-mine');
+              }
+              div.textContent = '💣';
+            } else if (cell.adjacentMines > 0) {
+              div.classList.add('n' + cell.adjacentMines);
+              div.textContent = cell.adjacentMines;
+            }
+          } else if (cell.flagged) {
+            div.classList.add('flagged');
+            div.textContent = '⚑';
+          }
+
+          grid.appendChild(div);
+        }
+      }
+    }
+
+    function revealCell(r, c) {
+      const cell = board[r][c];
+      if (cell.revealed || cell.flagged) return;
+
+      cell.revealed = true;
+
+      if (cell.mine) {
+        cell.clickedMine = true;
+        gameOver();
+        return;
+      }
+
+      // Flood fill for empty cells
+      if (cell.adjacentMines === 0) {
+        const queue = [[r, c]];
+        while (queue.length > 0) {
+          const [cr, cc] = queue.shift();
+          for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+              const nr = cr + dr;
+              const nc = cc + dc;
+              if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
+                const neighbor = board[nr][nc];
+                if (!neighbor.revealed && !neighbor.mine && !neighbor.flagged) {
+                  neighbor.revealed = true;
+                  if (neighbor.adjacentMines === 0) {
+                    queue.push([nr, nc]);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      checkWin();
+    }
+
+    function toggleFlag(r, c) {
+      const cell = board[r][c];
+      if (cell.revealed) return;
+      cell.flagged = !cell.flagged;
+      renderBoard();
+    }
+
+    function checkWin() {
+      let allRevealed = true;
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (!board[r][c].mine && !board[r][c].revealed) {
+            allRevealed = false;
+            break;
+          }
+        }
+        if (!allRevealed) break;
+      }
+
+      if (allRevealed) {
+        gameState = 'won';
+        document.getElementById('status').textContent = 'You Win! 🎉';
+      }
+      renderBoard();
+    }
+
+    function gameOver() {
+      gameState = 'lost';
+      // Reveal all mines
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (board[r][c].mine) {
+            board[r][c].revealed = true;
+          }
+        }
+      }
+      document.getElementById('status').textContent = 'Game Over! 💥';
+      renderBoard();
+    }
+
+    function newGame() {
+      gameState = 'playing';
+      document.getElementById('status').textContent = 'Click a cell to start';
+      createBoard();
+      renderBoard();
+    }
+
+    // Event listeners
+    document.getElementById('grid').addEventListener('click', (e) => {
+      if (gameState !== 'playing') return;
+      const cell = e.target.closest('.cell');
+      if (!cell) return;
+      const r = parseInt(cell.dataset.row);
+      const c = parseInt(cell.dataset.col);
+      revealCell(r, c);
+    });
+
+    document.getElementById('grid').addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      if (gameState !== 'playing') return;
+      const cell = e.target.closest('.cell');
+      if (!cell) return;
+      const r = parseInt(cell.dataset.row);
+      const c = parseInt(cell.dataset.col);
+      toggleFlag(r, c);
+    });
+
+    document.getElementById('new-game').addEventListener('click', newGame);
+
+    // Board size controls
+    document.getElementById('apply-size').addEventListener('click', () => {
+      const r = parseInt(document.getElementById('input-rows').value);
+      const c = parseInt(document.getElementById('input-cols').value);
+      const m = parseInt(document.getElementById('input-mines').value);
+      if (r < 5 || c < 5 || r > 30 || c > 30) return;
+      const maxMines = (r * c) - 1;
+      ROWS = r;
+      COLS = c;
+      MINES = Math.min(Math.max(m, 1), maxMines);
+      document.getElementById('input-mines').value = MINES;
+      newGame();
+    });
+
+    // Background image upload — saved to localStorage
+    function applyBackground(dataUrl) {
+      const grid = document.getElementById('grid');
+      grid.style.backgroundImage = `url(${dataUrl})`;
+      grid.style.backgroundSize = 'cover';
+      grid.style.backgroundPosition = 'center';
+      grid.style.backgroundRepeat = 'no-repeat';
+      document.getElementById('bg-clear').hidden = false;
+    }
+
+    function clearBackground() {
+      document.getElementById('grid').style.backgroundImage = '';
+      try { localStorage.removeItem(BG_STORAGE_KEY); } catch (e) {}
+      document.getElementById('bg-clear').hidden = true;
+    }
+
+    document.getElementById('bg-upload').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        try { localStorage.setItem(BG_STORAGE_KEY, dataUrl); } catch (e) {}
+        applyBackground(dataUrl);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('bg-clear').addEventListener('click', clearBackground);
+
+    // Restore saved background on load
+    try {
+      const savedBg = localStorage.getItem(BG_STORAGE_KEY);
+      if (savedBg) applyBackground(savedBg);
+    } catch (e) {
+      // localStorage unavailable (e.g. file:// protocol)
+    }
+
+    // Start
+    newGame();
+  </script>
+</body>
+</html>
