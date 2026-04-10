@@ -195,6 +195,23 @@
       font-size: 13px;
       color: #4fc3f7;
     }
+
+    #stats {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      font-size: 13px;
+      color: #888;
+      margin-top: 8px;
+    }
+
+    #stats span {
+      color: #bbb;
+    }
+
+    #stats .fastfail {
+      color: #ef5350;
+    }
   </style>
 </head>
 <body>
@@ -217,6 +234,7 @@
       <button id="new-game">New Game</button>
     </div>
     <br>
+    <div id="stats"></div>
     <a href="help.html" id="help-link">How to Play</a>
   </div>
 
@@ -227,7 +245,45 @@
 
     let board = [];
     let gameState = 'playing';
+    let moveCount = 0;
     const BG_STORAGE_KEY = 'minesweeper-bg';
+    const STATS_KEY = 'minesweeper-stats';
+
+    function loadStats() {
+      try {
+        const saved = localStorage.getItem(STATS_KEY);
+        if (saved) return JSON.parse(saved);
+      } catch (e) {}
+      return { played: 0, wins: 0, losses: 0, fastfails: 0 };
+    }
+
+    function saveStats(stats) {
+      try { localStorage.setItem(STATS_KEY, JSON.stringify(stats)); } catch (e) {}
+    }
+
+    function renderStats() {
+      const s = loadStats();
+      document.getElementById('stats').innerHTML =
+        `Played: <span>${s.played}</span> &middot; ` +
+        `Wins: <span>${s.wins}</span> &middot; ` +
+        `Losses: <span>${s.losses}</span> &middot; ` +
+        `Fast fails: <span class="fastfail">${s.fastfails}</span>`;
+    }
+
+    function recordResult(result) {
+      const stats = loadStats();
+      stats.played++;
+      if (result === 'won') {
+        stats.wins++;
+      } else {
+        stats.losses++;
+        if (moveCount <= 5) {
+          stats.fastfails++;
+        }
+      }
+      saveStats(stats);
+      renderStats();
+    }
 
     function createBoard() {
       board = [];
@@ -309,6 +365,7 @@
       const cell = board[r][c];
       if (cell.revealed || cell.flagged) return;
 
+      moveCount++;
       cell.revealed = true;
 
       if (cell.mine) {
@@ -365,6 +422,7 @@
       if (allRevealed) {
         gameState = 'won';
         document.getElementById('status').textContent = 'You Win! 🎉';
+        recordResult('won');
       }
       renderBoard();
     }
@@ -380,11 +438,13 @@
         }
       }
       document.getElementById('status').textContent = 'Game Over! 💥';
+      recordResult('lost');
       renderBoard();
     }
 
     function newGame() {
       gameState = 'playing';
+      moveCount = 0;
       document.getElementById('status').textContent = 'Click a cell to start';
       createBoard();
       renderBoard();
@@ -465,6 +525,7 @@
     }
 
     // Start
+    renderStats();
     newGame();
   </script>
 </body>
