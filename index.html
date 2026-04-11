@@ -263,9 +263,11 @@
 
     function renderStats() {
       const s = loadStats();
+      const eligible = s.played - s.fastfails;
+      const winPct = eligible > 0 ? Math.round(s.wins / eligible * 100) : 0;
       document.getElementById('stats').innerHTML =
         `Played: <span>${s.played}</span> &middot; ` +
-        `Wins: <span>${s.wins}</span> &middot; ` +
+        `Wins: <span>${s.wins}</span> (${winPct}%) &middot; ` +
         `Losses: <span>${s.losses}</span> &middot; ` +
         `Fast fails: <span class="fastfail">${s.fastfails}</span>`;
     }
