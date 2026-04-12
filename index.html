@@ -175,7 +175,7 @@
       align-items: flex-start;
     }
 
-    #new-game {
+    .new-game-btn {
       padding: 8px 24px;
       font-size: 14px;
       background: #444;
@@ -185,7 +185,7 @@
       cursor: pointer;
     }
 
-    #new-game:hover {
+    .new-game-btn:hover {
       background: #555;
     }
 
@@ -230,8 +230,9 @@
     </div>
     <div id="status">Click a cell to start</div>
     <div class="board-row">
+      <button id="new-game-left" class="new-game-btn">New Game</button>
       <div id="grid"></div>
-      <button id="new-game">New Game</button>
+      <button id="new-game" class="new-game-btn">New Game</button>
     </div>
     <br>
     <div id="stats"></div>
@@ -331,7 +332,9 @@
       grid.innerHTML = '';
       grid.style.gridTemplateColumns = `repeat(${COLS}, 32px)`;
       grid.style.gridTemplateRows = `repeat(${ROWS}, 32px)`;
-      document.getElementById('new-game').style.height = (ROWS * 32) + 'px';
+      const btnHeight = (ROWS * 32) + 'px';
+      document.getElementById('new-game').style.height = btnHeight;
+      document.getElementById('new-game-left').style.height = btnHeight;
 
       for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
@@ -473,6 +476,7 @@
     });
 
     document.getElementById('new-game').addEventListener('click', newGame);
+    document.getElementById('new-game-left').addEventListener('click', newGame);
 
     // Board size controls
     document.getElementById('apply-size').addEventListener('click', () => {
