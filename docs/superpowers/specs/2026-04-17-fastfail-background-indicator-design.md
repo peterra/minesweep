@@ -2,15 +2,15 @@
 
 ## Goal
 
-Give a subtle visual cue that the player has moved past the fast-fail threshold (moves 1–5). While still in the fast-fail window, the page background is a neutral gray; once a 6th move is made, the background fades to the committed color `#1a1a2e`.
+Give a subtle visual cue that the player has moved past the fast-fail threshold (moves 1–5). While still in the fast-fail window, the page background is a neutral gray; once a 5th move is made, the background fades to the committed color `#1a1a2e`.
 
 ## Behavior
 
 - Body background starts at a neutral gray (`#555`) on page load and on every new game.
-- When the player's 6th reveal completes, the body background fades to `#1a1a2e` over ~600ms.
-- If the game ends inside moves 1–5 (fast-fail), the background remains gray until New Game.
-- If the game ends after move 6, the background stays at the committed color.
-- New Game always resets the background to gray with the same transition.
+- When the player's 5th reveal completes, the body background fades to `#1a1a2e` over ~600ms.
+- If the game ends inside moves 1–4, the background remains gray until New Game.
+- If the game ends on move 5 or later, the background stays at the committed color.
+- New Game resets the background to gray instantly (no fade); subsequent progression to committed still fades.
 
 ## Implementation
 
@@ -21,7 +21,7 @@ Give a subtle visual cue that the player has moved past the fast-fail threshold 
   - `background: var(--bg-pending);`
   - `transition: background-color 600ms ease;`
 - Add a `body.committed` class that sets `background: var(--bg-committed);`.
-- In `revealCell()`, after `moveCount++`, if `moveCount === 6` add the `committed` class to `body`.
+- In `revealCell()`, after `moveCount++`, if `moveCount === 5` add the `committed` class to `body`.
 - In `newGame()`, remove the `committed` class from `body`.
 
 ## Scope / Non-goals
