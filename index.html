@@ -52,6 +52,13 @@
       min-height: 24px;
     }
 
+    #timer {
+      font-size: 14px;
+      margin-bottom: 12px;
+      color: #aaa;
+      font-variant-numeric: tabular-nums;
+    }
+
     .controls {
       display: flex;
       gap: 12px;
@@ -243,6 +250,7 @@
       <button id="bg-clear" hidden>Clear Background</button>
     </div>
     <div id="status">Click a cell to start</div>
+    <div id="timer">Time: 0:00</div>
     <div class="board-row">
       <button id="new-game-left" class="new-game-btn">New Game</button>
       <div id="grid"></div>
@@ -261,6 +269,8 @@
     let board = [];
     let gameState = 'playing';
     let moveCount = 0;
+    let timerStart = null;
+    let timerInterval = null;
     const BG_STORAGE_KEY = 'minesweeper-bg';
     const STATS_KEY = 'minesweeper-stats';
 
@@ -308,6 +318,35 @@
       if (pct > (stats.highestWinPct || 0)) stats.highestWinPct = pct;
       saveStats(stats);
       renderStats();
+    }
+
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      const mm = seconds >= 600 ? String(m).padStart(2, '0') : String(m);
+      return `${mm}:${String(s).padStart(2, '0')}`;
+    }
+
+    function elapsedSeconds() {
+      if (timerStart === null) return 0;
+      return Math.round((Date.now() - timerStart) / 1000);
+    }
+
+    function renderTimer() {
+      document.getElementById('timer').textContent = `Time: ${formatTime(elapsedSeconds())}`;
+    }
+
+    function startTimer() {
+      timerStart = Date.now();
+      renderTimer();
+      timerInterval = setInterval(renderTimer, 1000);
+    }
+
+    function stopTimer() {
+      if (timerInterval !== null) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
     }
 
     function createBoard() {
