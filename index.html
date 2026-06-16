@@ -295,12 +295,18 @@
       const s = loadStats();
       const eligible = s.played - s.fastfails;
       const winPct = eligible > 0 ? (s.wins / eligible * 100) : 0;
+      const bestTimes = (s.fastestTimes && s.fastestTimes.length)
+        ? s.fastestTimes.map(t =>
+            `<span title="${t.rows}×${t.cols}, ${t.mines} mines · ${t.date}">${formatTime(t.seconds)}</span>`
+          ).join(' &middot; ')
+        : '—';
       document.getElementById('stats').innerHTML =
         `Played: <span>${s.played}</span> &middot; ` +
         `Wins: <span>${s.wins}</span> (${winPct.toFixed(1)}%) &middot; ` +
         `Best: <span>${s.highestWinPct.toFixed(1)}%</span> &middot; ` +
         `Losses: <span>${s.losses}</span> &middot; ` +
-        `Fast fails: <span class="fastfail">${s.fastfails}</span>`;
+        `Fast fails: <span class="fastfail">${s.fastfails}</span> &middot; ` +
+        `Best times: ${bestTimes}`;
     }
 
     function recordResult(result, elapsedSeconds) {
