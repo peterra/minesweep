@@ -280,10 +280,11 @@
         if (saved) {
           const parsed = JSON.parse(saved);
           if (typeof parsed.highestWinPct !== 'number') parsed.highestWinPct = 0;
+          if (!Array.isArray(parsed.fastestTimes)) parsed.fastestTimes = [];
           return parsed;
         }
       } catch (e) {}
-      return { played: 0, wins: 0, losses: 0, fastfails: 0, highestWinPct: 0 };
+      return { played: 0, wins: 0, losses: 0, fastfails: 0, highestWinPct: 0, fastestTimes: [] };
     }
 
     function saveStats(stats) {
@@ -302,11 +303,23 @@
         `Fast fails: <span class="fastfail">${s.fastfails}</span>`;
     }
 
-    function recordResult(result) {
+    function recordResult(result, elapsedSeconds) {
       const stats = loadStats();
       stats.played++;
+      let newBest = false;
       if (result === 'won') {
         stats.wins++;
+        if (typeof elapsedSeconds === 'number') {
+          const entry = {
+            seconds: elapsedSeconds,
+            rows: ROWS, cols: COLS, mines: MINES,
+            date: new Date().toISOString().slice(0, 10),
+          };
+          stats.fastestTimes.push(entry);
+          stats.fastestTimes.sort((a, b) => a.seconds - b.seconds);
+          stats.fastestTimes = stats.fastestTimes.slice(0, 3);
+          newBest = stats.fastestTimes.includes(entry);
+        }
       } else {
         stats.losses++;
         if (moveCount <= 5) {
@@ -318,6 +331,7 @@
       if (pct > (stats.highestWinPct || 0)) stats.highestWinPct = pct;
       saveStats(stats);
       renderStats();
+      return newBest;
     }
 
     function formatTime(seconds) {
@@ -493,8 +507,11 @@
 
       if (allRevealed) {
         gameState = 'won';
-        document.getElementById('status').textContent = 'You Win! 🎉';
-        recordResult('won');
+        stopTimer();
+        const seconds = elapsedSeconds();
+        const newBest = recordResult('won', seconds);
+        document.getElementById('status').textContent =
+          newBest ? `You Win! 🎉 New best: ${formatTime(seconds)}` : 'You Win! 🎉';
       }
       renderBoard();
     }
