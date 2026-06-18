@@ -297,6 +297,9 @@
       const s = loadStats();
       const eligible = s.played - s.fastfails;
       const winPct = eligible > 0 ? (s.wins / eligible * 100) : 0;
+      const avgWin = s.winTimeCount > 0
+        ? formatTime(Math.round(s.winTimeSum / s.winTimeCount))
+        : '—';
       const bestTimes = (s.fastestTimes && s.fastestTimes.length)
         ? s.fastestTimes.map(t =>
             `<span title="${t.rows}×${t.cols}, ${t.mines} mines · ${t.date}">${formatTime(t.seconds)}</span>`
@@ -308,6 +311,7 @@
         `Best: <span>${s.highestWinPct.toFixed(1)}%</span> &middot; ` +
         `Losses: <span>${s.losses}</span> &middot; ` +
         `Fast fails: <span class="fastfail">${s.fastfails}</span> &middot; ` +
+        `Avg win: <span>${avgWin}</span> &middot; ` +
         `Best times: ${bestTimes}`;
     }
 
