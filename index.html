@@ -281,10 +281,12 @@
           const parsed = JSON.parse(saved);
           if (typeof parsed.highestWinPct !== 'number') parsed.highestWinPct = 0;
           if (!Array.isArray(parsed.fastestTimes)) parsed.fastestTimes = [];
+          if (typeof parsed.winTimeSum !== 'number') parsed.winTimeSum = 0;
+          if (typeof parsed.winTimeCount !== 'number') parsed.winTimeCount = 0;
           return parsed;
         }
       } catch (e) {}
-      return { played: 0, wins: 0, losses: 0, fastfails: 0, highestWinPct: 0, fastestTimes: [] };
+      return { played: 0, wins: 0, losses: 0, fastfails: 0, highestWinPct: 0, fastestTimes: [], winTimeSum: 0, winTimeCount: 0 };
     }
 
     function saveStats(stats) {
@@ -325,6 +327,8 @@
           stats.fastestTimes.sort((a, b) => a.seconds - b.seconds);
           stats.fastestTimes = stats.fastestTimes.slice(0, 3);
           newBest = stats.fastestTimes.includes(entry);
+          stats.winTimeSum += elapsedSeconds;
+          stats.winTimeCount++;
         }
       } else {
         stats.losses++;
