@@ -283,10 +283,12 @@
           if (!Array.isArray(parsed.fastestTimes)) parsed.fastestTimes = [];
           if (typeof parsed.winTimeSum !== 'number') parsed.winTimeSum = 0;
           if (typeof parsed.winTimeCount !== 'number') parsed.winTimeCount = 0;
+          if (typeof parsed.dailyPlayDate !== 'string') parsed.dailyPlayDate = '';
+          if (typeof parsed.dailyPlaySecs !== 'number') parsed.dailyPlaySecs = 0;
           return parsed;
         }
       } catch (e) {}
-      return { played: 0, wins: 0, losses: 0, fastfails: 0, highestWinPct: 0, fastestTimes: [], winTimeSum: 0, winTimeCount: 0 };
+      return { played: 0, wins: 0, losses: 0, fastfails: 0, highestWinPct: 0, fastestTimes: [], winTimeSum: 0, winTimeCount: 0, dailyPlayDate: '', dailyPlaySecs: 0 };
     }
 
     function saveStats(stats) {
@@ -339,6 +341,14 @@
         if (moveCount <= 5) {
           stats.fastfails++;
         }
+      }
+      if (typeof elapsedSeconds === 'number' && elapsedSeconds > 0) {
+        const today = new Date().toISOString().slice(0, 10);
+        if (stats.dailyPlayDate !== today) {
+          stats.dailyPlaySecs = 0;
+          stats.dailyPlayDate = today;
+        }
+        stats.dailyPlaySecs += elapsedSeconds;
       }
       const eligible = stats.played - stats.fastfails;
       const pct = eligible > 0 ? (stats.wins / eligible * 100) : 0;
@@ -533,6 +543,7 @@
     function gameOver() {
       gameState = 'lost';
       stopTimer();
+      const seconds = elapsedSeconds();
       // Reveal all mines
       for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
@@ -542,7 +553,7 @@
         }
       }
       document.getElementById('status').textContent = 'Game Over! 💥';
-      recordResult('lost');
+      recordResult('lost', seconds);
       renderBoard();
     }
 
