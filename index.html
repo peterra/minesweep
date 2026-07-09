@@ -538,6 +538,7 @@
         gameState = 'won';
         stopTimer();
         const seconds = elapsedSeconds();
+        timerStart = null;
         const newBest = recordResult('won', seconds);
         document.getElementById('status').textContent =
           newBest ? `You Win! 🎉 New best: ${formatTime(seconds)}` : 'You Win! 🎉';
@@ -549,6 +550,7 @@
       gameState = 'lost';
       stopTimer();
       const seconds = elapsedSeconds();
+      timerStart = null;
       // Reveal all mines
       for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
