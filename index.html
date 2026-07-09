@@ -307,6 +307,9 @@
             `<span title="${t.rows}×${t.cols}, ${t.mines} mines · ${t.date}">${formatTime(t.seconds)}</span>`
           ).join(' &middot; ')
         : '—';
+      const today = new Date().toISOString().slice(0, 10);
+      const dailySecs = (s.dailyPlayDate === today ? s.dailyPlaySecs : 0)
+        + (timerStart !== null ? elapsedSeconds() : 0);
       document.getElementById('stats').innerHTML =
         `Played: <span>${s.played}</span> &middot; ` +
         `Wins: <span>${s.wins}</span> (${winPct.toFixed(1)}%) &middot; ` +
@@ -314,7 +317,8 @@
         `Losses: <span>${s.losses}</span> &middot; ` +
         `Fast fails: <span class="fastfail">${s.fastfails}</span> &middot; ` +
         `Avg win: <span>${avgWin}</span> &middot; ` +
-        `Best times: ${bestTimes}`;
+        `Best times: ${bestTimes} &middot; ` +
+        `Today: <span>${formatTime(dailySecs)}</span>`;
     }
 
     function recordResult(result, elapsedSeconds) {
@@ -372,6 +376,7 @@
 
     function renderTimer() {
       document.getElementById('timer').textContent = `Time: ${formatTime(elapsedSeconds())}`;
+      renderStats();
     }
 
     function startTimer() {
