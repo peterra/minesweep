@@ -31,6 +31,10 @@
       background: var(--bg-committed);
     }
 
+    body.won {
+      background: #f9d71c;
+    }
+
     body.no-transition {
       transition: none;
     }
@@ -569,6 +573,7 @@
         const newBest = recordResult('won', seconds);
         document.getElementById('status').textContent =
           newBest ? `You Win! 🎉 New best: ${formatTime(seconds)}` : 'You Win! 🎉';
+        document.body.classList.add('won');
       }
       renderBoard();
     }
@@ -606,6 +611,7 @@
       renderStats();
       document.body.classList.add('no-transition');
       document.body.classList.remove('committed');
+      document.body.classList.remove('won');
       void document.body.offsetWidth;
       document.body.classList.remove('no-transition');
       document.getElementById('status').textContent = 'Click a cell to start';
