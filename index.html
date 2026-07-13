@@ -31,6 +31,11 @@
       background: var(--bg-committed);
     }
 
+    body.flash-red {
+      background: #d32f2f;
+      transition: none;
+    }
+
     body.won {
       background: #f9d71c;
     }
@@ -291,6 +296,7 @@
     let moveCount = 0;
     let timerStart = null;
     let timerInterval = null;
+    let blinkInterval = null;
     const BG_STORAGE_KEY = 'minesweeper-bg';
     const STATS_KEY = 'minesweeper-stats';
 
@@ -588,7 +594,21 @@
         const { newBestTime, newBestPct } = recordResult('won', seconds);
         document.getElementById('status').textContent =
           newBestTime ? `You Win! 🎉 New best: ${formatTime(seconds)}` : 'You Win! 🎉';
-        document.body.classList.add('won');
+        if (newBestTime || newBestPct) {
+          let blinkCount = 0;
+          blinkInterval = setInterval(() => {
+            document.body.classList.toggle('flash-red');
+            blinkCount++;
+            if (blinkCount >= 4) {
+              clearInterval(blinkInterval);
+              blinkInterval = null;
+              document.body.classList.remove('flash-red');
+              document.body.classList.add('won');
+            }
+          }, 150);
+        } else {
+          document.body.classList.add('won');
+        }
       }
       renderBoard();
     }
@@ -624,9 +644,14 @@
       document.getElementById('timer').textContent = 'Time: 0:00';
       document.getElementById('revealed-pct').textContent = 'Revealed: 0%';
       renderStats();
+      if (blinkInterval !== null) {
+        clearInterval(blinkInterval);
+        blinkInterval = null;
+      }
       document.body.classList.add('no-transition');
       document.body.classList.remove('committed');
       document.body.classList.remove('won');
+      document.body.classList.remove('flash-red');
       void document.body.offsetWidth;
       document.body.classList.remove('no-transition');
       document.getElementById('status').textContent = 'Click a cell to start';
