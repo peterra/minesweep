@@ -195,10 +195,10 @@ JSON.parse(localStorage.getItem('minesweeper-stats'))
 ```
 
 1. On a fresh profile (clear localStorage first via `localStorage.removeItem('minesweeper-stats')` and reload), the stats line should show `Since last win: —` (no win yet).
-2. Lose a game past move 5 (reveal 6+ cells before hitting a mine). `Since last win` should become `1`. `sinceLastWin` in storage should be `1`.
-3. Lose another game past move 5. `Since last win` should become `2`.
-4. Lose a game within the first 5 moves (fast fail — click a mine on move 1-5). `Since last win` should stay `2` (unchanged), while `Fast fails` increments.
-5. Win a game. `Since last win` should become `0` (not `—`, since you've now won at least once).
+2. Lose a game past move 5 (reveal 6+ cells before hitting a mine). The stats line still shows `Since last win: —` (no win has happened yet, so the display stays hidden regardless of losses), but `sinceLastWin` in storage should now be `1`.
+3. Lose another game past move 5. Display still shows `—`; stored `sinceLastWin` should be `2`.
+4. Lose a game within the first 5 moves (fast fail — click a mine on move 1-5). Stored `sinceLastWin` should stay `2` (unchanged), while `Fast fails` increments. Display still `—`.
+5. Win a game. `Since last win` should become `0` (not `—`, since you've now won at least once — this is the first point the display switches from `—` to a number).
 6. Lose past move 5 again. `Since last win` should become `1`.
 7. Reload the page. All values should persist correctly from storage.
 
