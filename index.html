@@ -305,10 +305,11 @@
           if (typeof parsed.winTimeCount !== 'number') parsed.winTimeCount = 0;
           if (typeof parsed.dailyPlayDate !== 'string') parsed.dailyPlayDate = '';
           if (typeof parsed.dailyPlaySecs !== 'number') parsed.dailyPlaySecs = 0;
+          if (typeof parsed.sinceLastWin !== 'number') parsed.sinceLastWin = 0;
           return parsed;
         }
       } catch (e) {}
-      return { played: 0, wins: 0, losses: 0, fastfails: 0, highestWinPct: 0, fastestTimes: [], winTimeSum: 0, winTimeCount: 0, dailyPlayDate: '', dailyPlaySecs: 0 };
+      return { played: 0, wins: 0, losses: 0, fastfails: 0, highestWinPct: 0, fastestTimes: [], winTimeSum: 0, winTimeCount: 0, dailyPlayDate: '', dailyPlaySecs: 0, sinceLastWin: 0 };
     }
 
     function saveStats(stats) {
@@ -327,6 +328,7 @@
             `<span title="${t.rows}×${t.cols}, ${t.mines} mines · ${t.date}">${formatTime(t.seconds)}</span>`
           ).join(' &middot; ')
         : '—';
+      const sinceLastWin = s.wins === 0 ? '—' : s.sinceLastWin;
       const today = new Date().toISOString().slice(0, 10);
       const dailySecs = (s.dailyPlayDate === today ? s.dailyPlaySecs : 0)
         + (timerStart !== null ? elapsedSeconds() : 0);
@@ -335,6 +337,7 @@
         `Wins: <span>${s.wins}</span> (${winPct.toFixed(1)}%) &middot; ` +
         `Best: <span>${s.highestWinPct.toFixed(1)}%</span> &middot; ` +
         `Losses: <span>${s.losses}</span> &middot; ` +
+        `Since last win: <span>${sinceLastWin}</span> &middot; ` +
         `Fast fails: <span class="fastfail">${s.fastfails}</span> &middot; ` +
         `Avg win: <span>${avgWin}</span> &middot; ` +
         `Best times: ${bestTimes} &middot; ` +
@@ -357,6 +360,7 @@
       let newBest = false;
       if (result === 'won') {
         stats.wins++;
+        stats.sinceLastWin = 0;
         if (typeof elapsedSeconds === 'number') {
           const entry = {
             seconds: elapsedSeconds,
@@ -374,6 +378,8 @@
         stats.losses++;
         if (moveCount <= 5) {
           stats.fastfails++;
+        } else {
+          stats.sinceLastWin++;
         }
       }
       accumulateDailyPlaySecs(stats, elapsedSeconds);
