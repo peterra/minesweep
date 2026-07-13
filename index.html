@@ -357,7 +357,7 @@
     function recordResult(result, elapsedSeconds) {
       const stats = loadStats();
       stats.played++;
-      let newBest = false;
+      let newBestTime = false;
       if (result === 'won') {
         stats.wins++;
         stats.sinceLastWin = 0;
@@ -370,7 +370,7 @@
           stats.fastestTimes.push(entry);
           stats.fastestTimes.sort((a, b) => a.seconds - b.seconds);
           stats.fastestTimes = stats.fastestTimes.slice(0, 3);
-          newBest = stats.fastestTimes.includes(entry);
+          newBestTime = stats.fastestTimes.includes(entry);
           stats.winTimeSum += elapsedSeconds;
           stats.winTimeCount++;
         }
@@ -385,10 +385,11 @@
       accumulateDailyPlaySecs(stats, elapsedSeconds);
       const eligible = stats.played - stats.fastfails;
       const pct = eligible > 0 ? (stats.wins / eligible * 100) : 0;
-      if (pct > (stats.highestWinPct || 0)) stats.highestWinPct = pct;
+      const newBestPct = pct > (stats.highestWinPct || 0);
+      if (newBestPct) stats.highestWinPct = pct;
       saveStats(stats);
       renderStats();
-      return newBest;
+      return { newBestTime, newBestPct };
     }
 
     function formatTime(seconds) {
@@ -584,9 +585,9 @@
         stopTimer();
         const seconds = elapsedSeconds();
         timerStart = null;
-        const newBest = recordResult('won', seconds);
+        const { newBestTime, newBestPct } = recordResult('won', seconds);
         document.getElementById('status').textContent =
-          newBest ? `You Win! 🎉 New best: ${formatTime(seconds)}` : 'You Win! 🎉';
+          newBestTime ? `You Win! 🎉 New best: ${formatTime(seconds)}` : 'You Win! 🎉';
         document.body.classList.add('won');
       }
       renderBoard();
