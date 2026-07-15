@@ -297,6 +297,7 @@
     let timerStart = null;
     let timerInterval = null;
     let blinkInterval = null;
+    let revealedAtMove5 = null;
     const BG_STORAGE_KEY = 'minesweeper-bg';
     const STATS_KEY = 'minesweeper-stats';
 
@@ -315,10 +316,12 @@
           if (typeof parsed.winStreak !== 'number') parsed.winStreak = 0;
           if (typeof parsed.longestWinStreak !== 'number') parsed.longestWinStreak = 0;
           if (typeof parsed.longestLossStreak !== 'number') parsed.longestLossStreak = 0;
+          if (typeof parsed.avgRevealedAtMove5Sum !== 'number') parsed.avgRevealedAtMove5Sum = 0;
+          if (typeof parsed.avgRevealedAtMove5Count !== 'number') parsed.avgRevealedAtMove5Count = 0;
           return parsed;
         }
       } catch (e) {}
-      return { played: 0, wins: 0, losses: 0, fastfails: 0, highestWinPct: 0, fastestTimes: [], winTimeSum: 0, winTimeCount: 0, dailyPlayDate: '', dailyPlaySecs: 0, sinceLastWin: 0, winStreak: 0, longestWinStreak: 0, longestLossStreak: 0 };
+      return { played: 0, wins: 0, losses: 0, fastfails: 0, highestWinPct: 0, fastestTimes: [], winTimeSum: 0, winTimeCount: 0, dailyPlayDate: '', dailyPlaySecs: 0, sinceLastWin: 0, winStreak: 0, longestWinStreak: 0, longestLossStreak: 0, avgRevealedAtMove5Sum: 0, avgRevealedAtMove5Count: 0 };
     }
 
     function saveStats(stats) {
@@ -331,6 +334,9 @@
       const winPct = eligible > 0 ? (s.wins / eligible * 100) : 0;
       const avgWin = s.winTimeCount > 0
         ? formatTime(Math.round(s.winTimeSum / s.winTimeCount))
+        : '—';
+      const avgRevealedAtMove5 = s.avgRevealedAtMove5Count > 0
+        ? Math.round(s.avgRevealedAtMove5Sum / s.avgRevealedAtMove5Count)
         : '—';
       const bestTimes = (s.fastestTimes && s.fastestTimes.length)
         ? s.fastestTimes.map(t =>
@@ -352,6 +358,7 @@
         `Longest loss streak: <span>${s.longestLossStreak}</span> &middot; ` +
         `Fast fails: <span class="fastfail">${s.fastfails}</span> &middot; ` +
         `Avg win: <span>${avgWin}</span> &middot; ` +
+        `Avg revealed @ move 5: <span>${avgRevealedAtMove5}</span> &middot; ` +
         `Best times: ${bestTimes} &middot; ` +
         `Today: <span>${formatTime(dailySecs)}</span>`;
     }
@@ -397,6 +404,10 @@
           if (stats.sinceLastWin > stats.longestLossStreak) stats.longestLossStreak = stats.sinceLastWin;
           stats.winStreak = 0;
         }
+      }
+      if (revealedAtMove5 !== null) {
+        stats.avgRevealedAtMove5Sum += revealedAtMove5;
+        stats.avgRevealedAtMove5Count++;
       }
       accumulateDailyPlaySecs(stats, elapsedSeconds);
       const eligible = stats.played - stats.fastfails;
@@ -537,6 +548,7 @@
       }
       const pct = safeTotal > 0 ? Math.floor((safeRevealed / safeTotal) * 100) : 0;
       document.getElementById('revealed-pct').textContent = `Revealed: ${pct}%`;
+      return safeRevealed;
     }
 
     function revealCell(r, c) {
@@ -581,7 +593,10 @@
         }
       }
 
-      updateRevealedPct();
+      const safeRevealed = updateRevealedPct();
+      if (moveCount === 5) {
+        revealedAtMove5 = safeRevealed;
+      }
       checkWin();
     }
 
@@ -657,6 +672,7 @@
       }
       gameState = 'playing';
       moveCount = 0;
+      revealedAtMove5 = null;
       stopTimer();
       timerStart = null;
       document.getElementById('timer').textContent = 'Time: 0:00';
