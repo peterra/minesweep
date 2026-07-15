@@ -313,10 +313,12 @@
           if (typeof parsed.dailyPlaySecs !== 'number') parsed.dailyPlaySecs = 0;
           if (typeof parsed.sinceLastWin !== 'number') parsed.sinceLastWin = 0;
           if (typeof parsed.winStreak !== 'number') parsed.winStreak = 0;
+          if (typeof parsed.longestWinStreak !== 'number') parsed.longestWinStreak = 0;
+          if (typeof parsed.longestLossStreak !== 'number') parsed.longestLossStreak = 0;
           return parsed;
         }
       } catch (e) {}
-      return { played: 0, wins: 0, losses: 0, fastfails: 0, highestWinPct: 0, fastestTimes: [], winTimeSum: 0, winTimeCount: 0, dailyPlayDate: '', dailyPlaySecs: 0, sinceLastWin: 0, winStreak: 0 };
+      return { played: 0, wins: 0, losses: 0, fastfails: 0, highestWinPct: 0, fastestTimes: [], winTimeSum: 0, winTimeCount: 0, dailyPlayDate: '', dailyPlaySecs: 0, sinceLastWin: 0, winStreak: 0, longestWinStreak: 0, longestLossStreak: 0 };
     }
 
     function saveStats(stats) {
@@ -346,6 +348,8 @@
         `Losses: <span>${s.losses}</span> &middot; ` +
         `Since last win: <span>${sinceLastWin}</span> &middot; ` +
         `Win streak: <span>${s.winStreak}</span> &middot; ` +
+        `Longest win streak: <span>${s.longestWinStreak}</span> &middot; ` +
+        `Longest loss streak: <span>${s.longestLossStreak}</span> &middot; ` +
         `Fast fails: <span class="fastfail">${s.fastfails}</span> &middot; ` +
         `Avg win: <span>${avgWin}</span> &middot; ` +
         `Best times: ${bestTimes} &middot; ` +
@@ -370,6 +374,7 @@
         stats.wins++;
         stats.sinceLastWin = 0;
         stats.winStreak++;
+        if (stats.winStreak > stats.longestWinStreak) stats.longestWinStreak = stats.winStreak;
         if (typeof elapsedSeconds === 'number') {
           const entry = {
             seconds: elapsedSeconds,
@@ -389,6 +394,7 @@
           stats.fastfails++;
         } else {
           stats.sinceLastWin++;
+          if (stats.sinceLastWin > stats.longestLossStreak) stats.longestLossStreak = stats.sinceLastWin;
           stats.winStreak = 0;
         }
       }
