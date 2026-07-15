@@ -341,8 +341,8 @@
         + (timerStart !== null ? elapsedSeconds() : 0);
       document.getElementById('stats').innerHTML =
         `Played: <span>${s.played}</span> &middot; ` +
-        `Wins: <span>${s.wins}</span> (${winPct.toFixed(1)}%) &middot; ` +
-        `Best: <span>${s.highestWinPct.toFixed(1)}%</span> &middot; ` +
+        `Wins: <span>${s.wins}</span> (${winPct.toFixed(2)}%) &middot; ` +
+        `Best: <span>${s.highestWinPct.toFixed(2)}%</span> &middot; ` +
         `Losses: <span>${s.losses}</span> &middot; ` +
         `Since last win: <span>${sinceLastWin}</span> &middot; ` +
         `Win streak: <span>${s.winStreak}</span> &middot; ` +
