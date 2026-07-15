@@ -336,7 +336,7 @@
           ).join(' &middot; ')
         : '—';
       const sinceLastWin = s.wins === 0 ? '—' : s.sinceLastWin;
-      const today = new Date().toISOString().slice(0, 10);
+      const today = localDateString();
       const dailySecs = (s.dailyPlayDate === today ? s.dailyPlaySecs : 0)
         + (timerStart !== null ? elapsedSeconds() : 0);
       document.getElementById('stats').innerHTML =
@@ -354,7 +354,7 @@
 
     function accumulateDailyPlaySecs(stats, seconds) {
       if (typeof seconds !== 'number' || seconds <= 0) return;
-      const today = new Date().toISOString().slice(0, 10);
+      const today = localDateString();
       if (stats.dailyPlayDate !== today) {
         stats.dailyPlaySecs = 0;
         stats.dailyPlayDate = today;
@@ -374,7 +374,7 @@
           const entry = {
             seconds: elapsedSeconds,
             rows: ROWS, cols: COLS, mines: MINES,
-            date: new Date().toISOString().slice(0, 10),
+            date: localDateString(),
           };
           stats.fastestTimes.push(entry);
           stats.fastestTimes.sort((a, b) => a.seconds - b.seconds);
@@ -412,6 +412,14 @@
     function elapsedSeconds() {
       if (timerStart === null) return 0;
       return Math.round((Date.now() - timerStart) / 1000);
+    }
+
+    function localDateString() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
     }
 
     function renderTimer() {
