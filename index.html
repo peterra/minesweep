@@ -598,10 +598,10 @@
       }
 
       const safeRevealed = updateRevealedPct();
-      if (moveCount === 5) {
+      checkWin();
+      if (moveCount === 5 && gameState === 'playing') {
         revealedAtMove5 = safeRevealed;
       }
-      checkWin();
     }
 
     function toggleFlag(r, c) {
