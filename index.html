@@ -321,10 +321,19 @@
           if (typeof parsed.longestLossStreak !== 'number') parsed.longestLossStreak = 0;
           if (typeof parsed.avgRevealedAtMove5Sum !== 'number') parsed.avgRevealedAtMove5Sum = 0;
           if (typeof parsed.avgRevealedAtMove5Count !== 'number') parsed.avgRevealedAtMove5Count = 0;
+          // One-time reset: pre-fix versions could record a win-on-move-5 as a
+          // full-board snapshot, wildly skewing this average. Clear any data
+          // collected before the fix, once per profile.
+          if (!parsed.avgRevealedAtMove5FixApplied) {
+            parsed.avgRevealedAtMove5Sum = 0;
+            parsed.avgRevealedAtMove5Count = 0;
+            parsed.avgRevealedAtMove5FixApplied = true;
+            saveStats(parsed);
+          }
           return parsed;
         }
       } catch (e) {}
-      return { played: 0, wins: 0, losses: 0, fastfails: 0, highestWinPct: 0, fastestTimes: [], winTimeSum: 0, winTimeCount: 0, dailyPlayDate: '', dailyPlaySecs: 0, sinceLastWin: 0, winStreak: 0, longestWinStreak: 0, longestLossStreak: 0, avgRevealedAtMove5Sum: 0, avgRevealedAtMove5Count: 0 };
+      return { played: 0, wins: 0, losses: 0, fastfails: 0, highestWinPct: 0, fastestTimes: [], winTimeSum: 0, winTimeCount: 0, dailyPlayDate: '', dailyPlaySecs: 0, sinceLastWin: 0, winStreak: 0, longestWinStreak: 0, longestLossStreak: 0, avgRevealedAtMove5Sum: 0, avgRevealedAtMove5Count: 0, avgRevealedAtMove5FixApplied: true };
     }
 
     function saveStats(stats) {
