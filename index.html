@@ -44,7 +44,9 @@
     body.won #timer,
     body.won #revealed-pct,
     body.won #stats,
-    body.won #stats span {
+    body.won #stats span,
+    body.won #best-stats,
+    body.won #best-stats span {
       color: #1a1a2e;
     }
 
@@ -241,7 +243,7 @@
       color: #4fc3f7;
     }
 
-    #stats {
+    #stats, #best-stats {
       display: flex;
       gap: 16px;
       justify-content: center;
@@ -250,7 +252,7 @@
       margin-top: 8px;
     }
 
-    #stats span {
+    #stats span, #best-stats span {
       color: #bbb;
     }
 
@@ -276,6 +278,7 @@
     <div id="status">Click a cell to start</div>
     <div id="revealed-pct">Revealed: 0%</div>
     <div id="timer">Time: 0:00</div>
+    <div id="best-stats"></div>
     <div class="board-row">
       <button id="new-game-left" class="new-game-btn">New Game</button>
       <div id="grid"></div>
@@ -347,19 +350,20 @@
       const today = localDateString();
       const dailySecs = (s.dailyPlayDate === today ? s.dailyPlaySecs : 0)
         + (timerStart !== null ? elapsedSeconds() : 0);
+      document.getElementById('best-stats').innerHTML =
+        `Best: <span>${s.highestWinPct.toFixed(2)}%</span> &middot; ` +
+        `Longest win streak: <span>${s.longestWinStreak}</span> &middot; ` +
+        `Longest loss streak: <span>${s.longestLossStreak}</span> &middot; ` +
+        `Best times: ${bestTimes}`;
       document.getElementById('stats').innerHTML =
         `Played: <span>${s.played}</span> &middot; ` +
         `Wins: <span>${s.wins}</span> (${winPct.toFixed(2)}%) &middot; ` +
-        `Best: <span>${s.highestWinPct.toFixed(2)}%</span> &middot; ` +
         `Losses: <span>${s.losses}</span> &middot; ` +
         `Since last win: <span>${sinceLastWin}</span> &middot; ` +
         `Win streak: <span>${s.winStreak}</span> &middot; ` +
-        `Longest win streak: <span>${s.longestWinStreak}</span> &middot; ` +
-        `Longest loss streak: <span>${s.longestLossStreak}</span> &middot; ` +
         `Fast fails: <span class="fastfail">${s.fastfails}</span> &middot; ` +
         `Avg win: <span>${avgWin}</span> &middot; ` +
         `Avg revealed @ move 5: <span>${avgRevealedAtMove5}</span> &middot; ` +
-        `Best times: ${bestTimes} &middot; ` +
         `Today: <span>${formatTime(dailySecs)}</span>`;
     }
 
