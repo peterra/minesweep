@@ -330,10 +330,19 @@
             parsed.avgRevealedAtMove5FixApplied = true;
             saveStats(parsed);
           }
+          // One-time reset: the metric switched from a raw cell count to a
+          // percentage of the board. Clear any raw-count data so it doesn't
+          // get mixed with percentage data in the same running sum.
+          if (!parsed.avgRevealedAtMove5PctMigrated) {
+            parsed.avgRevealedAtMove5Sum = 0;
+            parsed.avgRevealedAtMove5Count = 0;
+            parsed.avgRevealedAtMove5PctMigrated = true;
+            saveStats(parsed);
+          }
           return parsed;
         }
       } catch (e) {}
-      return { played: 0, wins: 0, losses: 0, fastfails: 0, highestWinPct: 0, fastestTimes: [], winTimeSum: 0, winTimeCount: 0, dailyPlayDate: '', dailyPlaySecs: 0, sinceLastWin: 0, winStreak: 0, longestWinStreak: 0, longestLossStreak: 0, avgRevealedAtMove5Sum: 0, avgRevealedAtMove5Count: 0, avgRevealedAtMove5FixApplied: true };
+      return { played: 0, wins: 0, losses: 0, fastfails: 0, highestWinPct: 0, fastestTimes: [], winTimeSum: 0, winTimeCount: 0, dailyPlayDate: '', dailyPlaySecs: 0, sinceLastWin: 0, winStreak: 0, longestWinStreak: 0, longestLossStreak: 0, avgRevealedAtMove5Sum: 0, avgRevealedAtMove5Count: 0, avgRevealedAtMove5FixApplied: true, avgRevealedAtMove5PctMigrated: true };
     }
 
     function saveStats(stats) {
@@ -348,7 +357,7 @@
         ? formatTime(Math.round(s.winTimeSum / s.winTimeCount))
         : '—';
       const avgRevealedAtMove5 = s.avgRevealedAtMove5Count > 0
-        ? Math.round(s.avgRevealedAtMove5Sum / s.avgRevealedAtMove5Count)
+        ? (s.avgRevealedAtMove5Sum / s.avgRevealedAtMove5Count).toFixed(1) + '%'
         : '—';
       const bestTimes = (s.fastestTimes && s.fastestTimes.length)
         ? s.fastestTimes.map(t =>
@@ -561,7 +570,7 @@
       }
       const pct = safeTotal > 0 ? Math.floor((safeRevealed / safeTotal) * 100) : 0;
       document.getElementById('revealed-pct').textContent = `Revealed: ${pct}%`;
-      return safeRevealed;
+      return { safeRevealed, safeTotal };
     }
 
     function revealCell(r, c) {
@@ -606,10 +615,12 @@
         }
       }
 
-      const safeRevealed = updateRevealedPct();
+      const revealCounts = updateRevealedPct();
       checkWin();
       if (moveCount === 5 && gameState === 'playing') {
-        revealedAtMove5 = safeRevealed;
+        revealedAtMove5 = revealCounts.safeTotal > 0
+          ? (revealCounts.safeRevealed / revealCounts.safeTotal) * 100
+          : 0;
       }
     }
 
